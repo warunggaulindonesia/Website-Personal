@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Penjualan</title>
+    <link rel="stylesheet" href="laporan.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Laporan Penjualan</h2>
+        <button onclick="window.location.href='index.html'">Beranda</button>
+        <div class="filter">
+            <button onclick="tampilkanHariIni()">Hari Ini</button>
+            <button onclick="tampilkanBulan(1)">Januari</button>
+            <button onclick="tampilkanBulan(2)">Februari</button>
+            <button onclick="tampilkanBulan(3)">Maret</button>
+            <button onclick="tampilkanBulan(4)">April</button>
+            <button onclick="tampilkanBulan(5)">Mei</button>
+            <button onclick="tampilkanBulan(6)">Juni</button>
+            <button onclick="tampilkanBulan(7)">Juli</button>
+            <button onclick="tampilkanBulan(8)">Agustus</button>
+            <button onclick="tampilkanBulan(9)">September</button>
+            <button onclick="tampilkanBulan(10)">Oktober</button>
+            <button onclick="tampilkanBulan(11)">November</button>
+            <button onclick="tampilkanBulan(12)">Desember</button>
+        </div>
+        <div class="actions" style="text-align: right; margin-bottom: 10px;">
+            <button onclick="toggleHapusMode()">Hapus</button>
+            <button id="konfirmasiHapus" style="display: none;" onclick="hapusTransaksiTerpilih()">Konfirmasi Hapus</button>
+            <button id="batalHapus" style="display: none;" onclick="batalHapus()">Batal</button>
+        </div>
+        <h3>Data Penjualan</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Pilih</th>
+                    <th>No</th>
+                    <th>Nama Produk</th>
+                    <th>Harga Jual</th>
+                    <th>Harga Modal</th>
+                    <th>Jumlah</th>
+                    <th>Metode Pembayaran</th>
+                    <th>Tanggal</th>
+                    <th>Laba</th>
+                </tr>
+            </thead>
+            <tbody id="tabelLaporan"></tbody>
+        </table>
+        <h3>Total Pendapatan: Rp <span id="totalPendapatan">0</span></h3>
+        <h3>Total Laba: Rp <span id="totalLaba">0</span></h3>
+    </div>
+    
+    <script>
+        let transaksi = JSON.parse(localStorage.getItem('transaksi')) || [];
+        let produk = JSON.parse(localStorage.getItem('produk')) || [];
+        let hapusMode = false;
+        
+        function getHargaModal(namaProduk) {
+            let item = produk.find(p => p.nama === namaProduk);
+            return item ? parseInt(item.hargaModal) : 0;
+        }
+
+        function tampilkanLaporan(filterFn) {
+            let tabel = document.getElementById("tabelLaporan");
+            let totalPendapatan = 0;
+            let totalLaba = 0;
+            tabel.innerHTML = "";
+
+            let groupedTransactions = {};
+            transaksi.filter(filterFn).forEach((t, index) => {
+                if (!groupedTransactions[t.metodePembayaran]) {
+                    groupedTransactions[t.metodePembayaran] = [];
+                }
+                groupedTransactions[t.metodePembayaran].push({ ...t, index });
+            });
+
+            for (let metode in groupedTransactions) {
+                let no = 1; 
+                let rows = groupedTransactions[metode].map(t => {
+                    let hargaModal = getHargaModal(t.nama);
+                    let laba = (t.harga - hargaModal) * t.jumlah;
+                    totalPendapatan += t.harga * t.jumlah;
+                    totalLaba += laba;
+                    return `
+                        <tr>
+                            <td><input type="checkbox" class="hapusCheckbox" value="${t.index}" style="display: ${hapusMode ? 'inline' : 'none'};"></td>
+                            <td>${no++}</td>
+                            <td>${t.nama}</td>
+                            <td>Rp ${t.harga}</td>
+                            <td>Rp ${hargaModal}</td>
+                            <td>${t.jumlah}</td>
+                            <td>${t.metodePembayaran}</td>
+                            <td>${t.tanggal}</td>
+                            <td>Rp ${laba}</td>
+                        </tr>
+                    `;
+                }).join('');
+                tabel.innerHTML += `<tr><td colspan="9" style="background:#f0f0f0;font-weight:bold;">${metode}</td></tr>` + rows;
+            }
+
+            document.getElementById("totalPendapatan").textContent = totalPendapatan;
+            document.getElementById("totalLaba").textContent = totalLaba;
+        }
+
+        function tampilkanHariIni() {
+            let today = new Date().toISOString().split("T")[0];
+            tampilkanLaporan(t => t.tanggal === today);
+        }
+
+        function tampilkanBulan(bulan) {
+            tampilkanLaporan(t => new Date(t.tanggal).getMonth() + 1 === bulan);
+        }
+
+        function toggleHapusMode() {
+            hapusMode = !hapusMode;
+            document.querySelectorAll('.hapusCheckbox').forEach(cb => {
+                cb.style.display = hapusMode ? 'inline' : 'none';
+            });
+            document.getElementById("konfirmasiHapus").style.display = hapusMode ? 'inline' : 'none';
+            document.getElementById("batalHapus").style.display = hapusMode ? 'inline' : 'none';
+        }
+
+        function hapusTransaksiTerpilih() {
+            let ceklis = document.querySelectorAll('.hapusCheckbox:checked');
+            let indeksHapus = Array.from(ceklis).map(cb => parseInt(cb.value)).sort((a, b) => b - a);
+            indeksHapus.forEach(index => transaksi.splice(index, 1));
+            localStorage.setItem('transaksi', JSON.stringify(transaksi));
+            toggleHapusMode();
+            tampilkanHariIni();
+        }
+
+        function batalHapus() {
+            toggleHapusMode();
+        }
+
+        tampilkanHariIni();
+    </script>
+</body>
+</html>

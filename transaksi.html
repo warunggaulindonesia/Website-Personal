@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaksi</title>
+    <link rel="stylesheet" href="transaksi.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Transaksi</h2>
+        <button onclick="kembaliKeBeranda()">Beranda</button>
+        
+        <div class="search-container">
+            <input type="text" id="searchProduk" placeholder="Cari produk..." oninput="cariProduk()">
+        </div>
+        
+        <h3>Daftar Produk</h3>
+        <ul id="daftarProduk" class="product-list"></ul>
+        
+        <h3>Keranjang</h3>
+        <ul id="keranjang"></ul>
+        <p>Total: Rp <span id="totalHarga">0</span></p>
+        
+        <h3>Metode Pembayaran</h3>
+        <select id="metodePembayaran" onchange="tampilkanOpsiPembayaran()">
+            <option value="tunai">Tunai</option>
+            <option value="transfer">Transfer</option>
+            <option value="qris">QRIS</option>
+        </select>
+        
+        <div id="inputTunai" class="payment-option">
+            <input type="number" id="bayar" placeholder="Masukkan jumlah bayar" oninput="hitungKembalian()">
+            <p>Kembalian: Rp <span id="kembalian">0</span></p>
+        </div>
+        
+        <div id="inputQris" class="payment-option" style="display: none;">
+            <p>Silakan scan QR untuk pembayaran:</p>
+        </div>
+        
+        <button onclick="prosesPembayaran()">Bayar</button>
+    </div>
+    
+    <script>
+        let produk = JSON.parse(localStorage.getItem('produk')) || [];
+        let keranjang = {};
+        let hasilPencarian = [...produk];
+
+        function kembaliKeBeranda() {
+            window.location.href = 'index.html';
+        }
+
+        function tampilkanProduk(listProduk = hasilPencarian) {
+            let daftarProduk = document.getElementById('daftarProduk');
+            daftarProduk.innerHTML = '';
+            listProduk.sort((a, b) => a.nama.localeCompare(b.nama));
+            listProduk.forEach((p, index) => {
+                daftarProduk.innerHTML += `
+                    <li>
+                        <div>
+                            <strong>${p.nama}</strong><br>
+                            Stok: ${p.stok} | Harga: Rp ${p.hargaJual}
+                        </div>
+                        <button class="add-to-cart" onclick="tambahKeKeranjang(${produk.indexOf(p)})">Tambah</button>
+                    </li>`;
+            });
+        }
+
+        function cariProduk() {
+            let keyword = document.getElementById('searchProduk').value.toLowerCase();
+            hasilPencarian = produk.filter(p => p.nama.toLowerCase().includes(keyword));
+            tampilkanProduk(hasilPencarian);
+        }
+
+        function tambahKeKeranjang(index) {
+            let item = produk[index];
+            if (item.stok > 0) {
+                if (keranjang[item.nama]) {
+                    keranjang[item.nama].jumlah++;
+                } else {
+                    keranjang[item.nama] = { harga: item.hargaJual, jumlah: 1, index };
+                }
+                item.stok--; 
+                localStorage.setItem('produk', JSON.stringify(produk));
+                tampilkanKeranjang();
+                tampilkanProduk();
+            } else {
+                alert('Stok habis!');
+            }
+        }
+
+        function tampilkanKeranjang() {
+            let daftarKeranjang = document.getElementById('keranjang');
+            let totalHarga = 0;
+            daftarKeranjang.innerHTML = '';
+            for (let nama in keranjang) {
+                let item = keranjang[nama];
+                totalHarga += item.harga * item.jumlah;
+                daftarKeranjang.innerHTML += `
+                    <li>
+                        ${nama} = Rp ${item.harga} (${item.jumlah})
+                        <button onclick="hapusDariKeranjang('${nama}')">Hapus</button>
+                    </li>`;
+            }
+            document.getElementById('totalHarga').textContent = totalHarga;
+        }
+
+        function hapusDariKeranjang(nama) {
+            let item = keranjang[nama];
+            if (item.jumlah > 1) {
+                item.jumlah--;
+            } else {
+                delete keranjang[nama];
+            }
+            produk[item.index].stok++;
+            localStorage.setItem('produk', JSON.stringify(produk));
+            tampilkanKeranjang();
+            tampilkanProduk();
+        }
+
+        function hitungKembalian() {
+            let bayar = parseInt(document.getElementById('bayar').value) || 0;
+            let total = parseInt(document.getElementById('totalHarga').textContent);
+            let kembalian = bayar - total;
+            document.getElementById('kembalian').textContent = kembalian > 0 ? kembalian : 0;
+        }
+
+        function tampilkanOpsiPembayaran() {
+            let metode = document.getElementById('metodePembayaran').value;
+            document.getElementById('inputTunai').style.display = metode === 'tunai' ? 'block' : 'none';
+            document.getElementById('inputQris').style.display = metode === 'qris' ? 'block' : 'none';
+        }
+
+        function prosesPembayaran() {
+            let metode = document.getElementById('metodePembayaran').value;
+            if (metode === 'qris') {
+                alert('Silakan selesaikan pembayaran melalui QRIS.');
+            } else {
+                alert('Pembayaran berhasil!');
+            }
+
+            let transaksiSebelumnya = JSON.parse(localStorage.getItem('transaksi')) || [];
+            let tanggalHariIni = new Date().toISOString().split("T")[0];
+
+            for (let nama in keranjang) {
+                let item = keranjang[nama];
+                transaksiSebelumnya.push({
+                    nama: nama,
+                    harga: item.harga,
+                    jumlah: item.jumlah,
+                    metodePembayaran: metode,
+                    tanggal: tanggalHariIni
+                });
+            }
+
+            localStorage.setItem('transaksi', JSON.stringify(transaksiSebelumnya));
+
+            keranjang = {};
+            tampilkanKeranjang();
+            document.getElementById('bayar').value = '';
+            document.getElementById('kembalian').textContent = '0';
+        }
+
+        tampilkanProduk();
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warung Gaul</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Kasir Warung Gaul</h2>
+        <h3>"Nikmatilah Kerugianmu, sebab bukanlah dirimu yang telah kehilangan, melainkan tersisa dirimu yang penuh kekuatan."</h3>
+        <div class="menu">
+            <button onclick="bukaHalaman('beranda.html')">Beranda</button>
+            <button onclick="bukaHalaman('stok.html')">Manajemen Stok</button>
+            <button onclick="bukaHalaman('transaksi.html')">Transaksi</button>
+            <button onclick="bukaHalaman('laporan.html')">Laporan Penjualan</button>
+            <button onclick="bukaHalaman('amal.html')">Charity</button>
+        </div>
+    </div>
+    
+    <script>
+        function bukaHalaman(halaman) {
+            window.location.href = halaman;
+        }
+    </script>
+</body>
+</html>

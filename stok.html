@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Stok</title>
+    <link rel="stylesheet" href="stok.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Manajemen Stok</h2>
+        <button onclick="kembaliKeBeranda()">Kembali</button>
+        
+        <input type="text" id="namaProduk" placeholder="Nama Produk">
+        <input type="number" id="hargaModal" placeholder="Harga Modal">
+        <input type="number" id="hargaJual" placeholder="Harga Jual">
+        <input type="number" id="stokProduk" placeholder="Stok">
+        <button onclick="tambahProduk()">Tambah Produk</button>
+
+        <h3>Daftar Produk</h3>
+
+        <!-- Input pencarian -->
+        <input type="text" id="cariProduk" placeholder="Cari Nama Produk..." oninput="tampilkanProduk()">
+
+        <ul id="daftarProduk"></ul>
+    </div>
+    
+    <script>
+        let editIndex = null;
+        
+        function kembaliKeBeranda() {
+            window.location.href = 'index.html';
+        }
+        
+        function tambahProduk() {
+            let nama = document.getElementById('namaProduk').value.trim();
+            let hargaModal = parseFloat(document.getElementById('hargaModal').value);
+            let hargaJual = parseFloat(document.getElementById('hargaJual').value);
+            let stok = parseInt(document.getElementById('stokProduk').value);
+            
+            if (nama && !isNaN(hargaModal) && !isNaN(hargaJual) && !isNaN(stok)) {
+                let daftarProduk = JSON.parse(localStorage.getItem('produk')) || [];
+                
+                if (editIndex !== null) {
+                    daftarProduk[editIndex] = { nama, hargaModal, hargaJual, stok };
+                    editIndex = null;
+                } else {
+                    daftarProduk.push({ nama, hargaModal, hargaJual, stok });
+                }
+                
+                localStorage.setItem('produk', JSON.stringify(daftarProduk));
+                tampilkanProduk();
+                resetForm();
+            }
+        }
+        
+        function tampilkanProduk() {
+            let daftarProduk = JSON.parse(localStorage.getItem('produk')) || [];
+            let list = document.getElementById('daftarProduk');
+            let keyword = document.getElementById('cariProduk').value.toLowerCase();
+            
+            list.innerHTML = '';
+            daftarProduk.forEach((p, index) => {
+                if (p.nama.toLowerCase().includes(keyword)) {
+                    list.innerHTML += `
+                    <li>
+                        <div><strong>Nama Produk:</strong> ${p.nama}</div>
+                        <div><strong>Stok:</strong> ${p.stok}</div>
+                        <div><strong>Modal:</strong> Rp ${p.hargaModal}</div>
+                        <div><strong>Jual:</strong> Rp ${p.hargaJual}</div>
+                        <div class="button-group">
+                            <button class="edit" onclick="editProduk(${index})">Edit</button>
+                            <button onclick="hapusProduk(${index})">Hapus</button>
+                        </div>
+                    </li>`;
+                }
+            });
+
+            // Simpan data harga modal dan harga jual ke localStorage untuk laporan.html & transaksi.html
+            localStorage.setItem('hargaProduk', JSON.stringify(daftarProduk.reduce((obj, item) => {
+                obj[item.nama] = { hargaModal: item.hargaModal, hargaJual: item.hargaJual };
+                return obj;
+            }, {})));
+        }
+        
+        function hapusProduk(index) {
+            let daftarProduk = JSON.parse(localStorage.getItem('produk')) || [];
+            daftarProduk.splice(index, 1);
+            localStorage.setItem('produk', JSON.stringify(daftarProduk));
+            tampilkanProduk();
+        }
+        
+        function editProduk(index) {
+            let daftarProduk = JSON.parse(localStorage.getItem('produk')) || [];
+            let produk = daftarProduk[index];
+            
+            document.getElementById('namaProduk').value = produk.nama;
+            document.getElementById('hargaModal').value = produk.hargaModal;
+            document.getElementById('hargaJual').value = produk.hargaJual;
+            document.getElementById('stokProduk').value = produk.stok;
+            
+            editIndex = index;
+        }
+        
+        function resetForm() {
+            document.getElementById('namaProduk').value = '';
+            document.getElementById('hargaModal').value = '';
+            document.getElementById('hargaJual').value = '';
+            document.getElementById('stokProduk').value = '';
+        }
+        
+        tampilkanProduk();
+    </script>
+</body>
+</html>

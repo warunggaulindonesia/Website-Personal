@@ -1,0 +1,190 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(150deg, #000000, #897a21); /* Gradasi hitam ke emas */
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    text-align: center;
+    overflow-x: hidden;
+    padding: 20px;
+}
+
+.container {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+h2 {
+    font-size: 2em;
+    color: #ffffff;
+    margin-bottom: 30px;
+    margin-top: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px #f4c542, 0 0 10px #ffd700;
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+/* Animation for glowing effect */
+@keyframes glow {
+    0% {
+        text-shadow: 0 0 5px #423908, 0 0 10px #72640f, 0 0 15px #a08b16;
+    }
+    100% {
+        text-shadow: 0 0 10px #4c420b, 0 0 20px #6b5d10, 0 0 30px #8d7c19;
+    }
+}
+
+h3 {
+    font-size: 1em;
+    color: #ffd700;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+/* Tombol kembali dan hapus */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.actions button {
+    background-color: #000;
+    color: #ffd700;
+    font-size: 0.8em;
+    padding: 8px 13px;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.actions button:hover {
+    background-color: #c60000;
+    color: #000;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.6);
+}
+
+/* Filter tombol */
+.filter {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.filter button {
+    background-color: #000;
+    color: #ffd700;
+    font-size: 0.8em;
+    padding: 10px 20px;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.filter button:hover {
+    background-color: #ffd700;
+    color: #000;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.6);
+}
+
+button:focus {
+    outline: none;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid #ffd700;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ffd700;
+}
+
+th {
+    background-color: #333;
+    color: #ffd700;
+}
+
+td {
+    background-color: #444;
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background-color: #555;
+}
+
+tr:hover {
+    background-color: #666;
+}
+
+table td, table th {
+    font-size: 0.7em;
+    padding: 12px;
+    text-align: center;
+}
+
+h3 span {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+        max-width: 100%;
+    }
+
+    h2 {
+        font-size: 1em;
+    }
+
+    h3 {
+        font-size: 1em;
+    }
+
+    table th, table td {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+
+    .filter button {
+        font-size: 0.9em;
+        padding: 8px 16px;
+    }
+
+    .actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+}
